@@ -94,6 +94,11 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
 
+      - name: Build RPM
+        run: |
+          ARCH=x86_64 DEST=build/packages/linux/amd64 tools/packaging/linux/create_rpm.sh
+          ARCH=aarch64 DEST=build/packages/linux/arm64 tools/packaging/linux/create_rpm.sh
+
       - name: Import Package Signing GPG Key
         run: |
           echo "$PKG_SIGN_PRIVATE_KEY" > pkg_sign_private.key
@@ -102,11 +107,7 @@ jobs:
           gpg --armor --export -a "haojh gpg test" > pkg_sign_public.key
           rpm --import pkg_sign_public.key
           echo "%_gpg_name haojh gpg test" > ~/.rpmmacros
-
-      - name: Build RPM
-        run: |
-          ARCH=x86_64 DEST=build/packages/linux/amd64 tools/packaging/linux/create_rpm.sh
-          ARCH=aarch64 DEST=build/packages/linux/arm64 tools/packaging/linux/create_rpm.sh
+          rpmsign --addsign build/packages/linux/*/*.rpm
 
       - name: Cache rpms
         uses: actions/cache@v2
