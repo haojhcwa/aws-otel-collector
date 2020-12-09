@@ -100,9 +100,8 @@ jobs:
           gpg --import pkg_sign_private.key
           gpg --list-keys
           gpg --armor --export -a "haojh gpg test" > pkg_sign_public.key
-          echo pkg_sign_public.key
-          ls
           rpm --import pkg_sign_public.key
+          echo "%_gpg_name haojh gpg test" > ~/.rpmmacros
 
       - name: Build RPM
         run: |
