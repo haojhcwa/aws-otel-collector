@@ -99,7 +99,7 @@ jobs:
           echo "$PKG_SIGN_PRIVATE_KEY" > pkg_sign_private.key
           gpg --import pkg_sign_private.key
           gpg --list-keys
-          gpg --armor --export pkg_sign_public.key
+          gpg --armor --export -a "haojh gpg test" > pkg_sign_public.key
           echo pkg_sign_public.key
           ls
           rpm --import pkg_sign_public.key
