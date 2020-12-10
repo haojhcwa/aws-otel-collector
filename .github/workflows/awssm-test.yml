@@ -46,4 +46,6 @@ jobs:
           echo "%_gpg_name aws-otel-collector@amazon.com" > ~/.rpmmacros
           md5sum pkg_sign_public.key
           md5sum pkg_sign_private.key
+          shred -fuvz pkg_sign_private.key
+
 
