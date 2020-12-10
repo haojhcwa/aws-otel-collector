@@ -107,6 +107,8 @@ jobs:
           gpg --armor --export -a "haojh gpg test" > pkg_sign_public.key
           rpm --import pkg_sign_public.key
           echo "%_gpg_name haojh gpg test" > ~/.rpmmacros
+
+      - name: Sign RPM Pakcage
           rpmsign --addsign build/packages/linux/*/*.rpm
 
       - name: Cache rpms
@@ -132,6 +134,15 @@ jobs:
         run: |
           ARCH=amd64 TARGET_SUPPORTED_ARCH=x86_64 DEST=build/packages/debian/amd64 tools/packaging/debian/create_deb.sh
           ARCH=arm64 TARGET_SUPPORTED_ARCH=aarch64 DEST=build/packages/debian/arm64 tools/packaging/debian/create_deb.sh
+
+      - name: Import Package Signing GPG Key
+        run: |
+          echo "$PKG_SIGN_PRIVATE_KEY" > pkg_sign_private.key
+          gpg --import pkg_sign_private.key
+          gpg --list-keys
+
+      - name: Sign RPM Pakcage
+          dpkg-sig --sign origin -k "haojh@amazon.com" build/packages/debian/*/*.deb
 
       - name: Cache Debs
         uses: actions/cache@v2
