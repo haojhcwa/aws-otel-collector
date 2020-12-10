@@ -105,6 +105,7 @@ jobs:
           gpg --import pkg_sign_private.key
           gpg --list-keys
           gpg --armor --export -a "haojh gpg test" > pkg_sign_public.key
+          rpm --version
           rpm --import pkg_sign_public.key
           echo "%_gpg_name haojh gpg test" > ~/.rpmmacros
 
@@ -144,6 +145,7 @@ jobs:
 
       - name: Sign RPM Pakcage
         run: |
+          sudo apt install dpkg-sig
           dpkg-sig --sign origin -k "haojh@amazon.com" build/packages/debian/*/*.deb
 
       - name: Cache Debs
