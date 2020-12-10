@@ -109,6 +109,7 @@ jobs:
           echo "%_gpg_name haojh gpg test" > ~/.rpmmacros
 
       - name: Sign RPM Pakcage
+        run: |
           rpmsign --addsign build/packages/linux/*/*.rpm
 
       - name: Cache rpms
@@ -142,6 +143,7 @@ jobs:
           gpg --list-keys
 
       - name: Sign RPM Pakcage
+        run: |
           dpkg-sig --sign origin -k "haojh@amazon.com" build/packages/debian/*/*.deb
 
       - name: Cache Debs
