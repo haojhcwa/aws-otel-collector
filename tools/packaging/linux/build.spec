@@ -6,9 +6,6 @@ License:    Amazon Software License. Copyright 2017 Amazon.com, Inc. or its affi
 Group:      Applications/AWS
 Source0:    %{RPM_NAME}-%{VERSION}.tar.gz
 
-%_source_filedigest_algorithm 8
-%_binary_filedigest_algorithm 8
-
 %description
 This package provides daemon of AWS OTel Collector
 
