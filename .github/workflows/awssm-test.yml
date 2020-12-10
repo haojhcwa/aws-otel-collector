@@ -27,7 +27,7 @@ env:
   PKG_SIGN_PRIVATE_KEY_NAME: aoc-linux-pkg-signing-gpg-key
 jobs:
 
-  Sign Package:
+  sign-package:
     runs-on: ubuntu-latest
     steps:
       - name: Install AWS Cli
