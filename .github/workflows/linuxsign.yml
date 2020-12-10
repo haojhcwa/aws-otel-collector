@@ -99,19 +99,32 @@ jobs:
           ARCH=x86_64 DEST=build/packages/linux/amd64 tools/packaging/linux/create_rpm.sh
           ARCH=aarch64 DEST=build/packages/linux/arm64 tools/packaging/linux/create_rpm.sh
 
+      - name: Download Package Signing GPG key
+        run: |
+          aws secretsmanager get-secret-value --region us-west-2 --secret-id "$PKG_SIGN_PRIVATE_KEY_NAME" | jq -r ".SecretString" > pkg_sign_private.key
+          md5sum pkg_sign_private.key
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SIGN_PKG_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SIGN_PKG_AWS_SECRET_ACCESS_KEY }}
+
       - name: Import Package Signing GPG Key
         run: |
-          echo "$PKG_SIGN_PRIVATE_KEY" > pkg_sign_private.key
           gpg --import pkg_sign_private.key
           gpg --list-keys
-          gpg --armor --export -a "haojh gpg test" > pkg_sign_public.key
-          rpm --version
+          gpg --armor --export -a "aws-otel-collector@amazon.com" > pkg_sign_public.key
           rpm --import pkg_sign_public.key
-          echo "%_gpg_name haojh gpg test" > ~/.rpmmacros
+          echo "%_gpg_name aws-otel-collector@amazon.com" > ~/.rpmmacros
+          md5sum pkg_sign_public.key
+          shred -fuvz pkg_sign_private.key
 
       - name: Sign RPM Pakcage
         run: |
           rpmsign --addsign build/packages/linux/*/*.rpm
+
+      - name: Remove Package Signing GPG Key from local GPG Key Ring
+        run: |
+          gpg --delete-secret-keys aws-otel-collector@amazon.com
+          gpg --list-secret-keys
 
       - name: Cache rpms
         uses: actions/cache@v2
@@ -137,16 +150,29 @@ jobs:
           ARCH=amd64 TARGET_SUPPORTED_ARCH=x86_64 DEST=build/packages/debian/amd64 tools/packaging/debian/create_deb.sh
           ARCH=arm64 TARGET_SUPPORTED_ARCH=aarch64 DEST=build/packages/debian/arm64 tools/packaging/debian/create_deb.sh
 
+      - name: Download Package Signing GPG key
+        run: |
+          aws secretsmanager get-secret-value --region us-west-2 --secret-id "$PKG_SIGN_PRIVATE_KEY_NAME" | jq -r ".SecretString" > pkg_sign_private.key
+          md5sum pkg_sign_private.key
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SIGN_PKG_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SIGN_PKG_AWS_SECRET_ACCESS_KEY }}
+
       - name: Import Package Signing GPG Key
         run: |
-          echo "$PKG_SIGN_PRIVATE_KEY" > pkg_sign_private.key
           gpg --import pkg_sign_private.key
-          gpg --list-keys
+          gpg --list-private-keys
+          shred -fuvz pkg_sign_private.key
 
       - name: Sign RPM Pakcage
         run: |
           sudo apt install -y dpkg-sig
           dpkg-sig --sign origin -k "haojh@amazon.com" build/packages/debian/*/*.deb
+
+      - name: Remove Package Signing GPG Key from local GPG Key Ring
+        run: |
+          gpg --delete-secret-keys aws-otel-collector@amazon.com
+          gpg --list-secret-keys
 
       - name: Cache Debs
         uses: actions/cache@v2
