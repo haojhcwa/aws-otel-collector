@@ -1,0 +1,53 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# A copy of the License is located at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# or in the "license" file accompanying this file. This file is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+
+name: AWS Cli Secret Manager Test
+
+on:
+  push:
+    branches:
+      - testsecretsmanager
+
+env:
+  IMAGE_NAME: aws-otel-collector
+  PACKAGING_ROOT: build/packages
+  ECR_REPO: aws/aws-otel-collector
+  TF_VAR_aws_access_key_id: ${{ secrets.INTEG_TEST_AWS_KEY_ID }}
+  TF_VAR_aws_secret_access_key: ${{ secrets.INTEG_TEST_AWS_KEY_SECRET }}
+  PKG_SIGN_PRIVATE_KEY_NAME: aoc-linux-pkg-signing-gpg-key
+jobs:
+
+  Sign Package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install AWS Cli
+        run: |
+          sudo apt install awscli
+
+      - name: Download Package Signing GPG key
+        run: |
+          aws secretsmanager get-secret-value --region us-west-2 --secret-id "$PKG_SIGN_PRIVATE_KEY_NAME" | jq -r ".SecretString" > pkg_sign_private.key
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SIGN_PKG_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SIGN_PKG_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Import Package Signing GPG Key
+        run: |
+          gpg --import pkg_sign_private.key
+          gpg --list-keys
+          gpg --armor --export -a "aws-otel-collector@amazon.com" > pkg_sign_public.key
+          rpm --import pkg_sign_public.key
+          echo "%_gpg_name aws-otel-collector@amazon.com" > ~/.rpmmacros
+          md5sum pkg_sign_public.key
+          md5sum pkg_sign_private.key
+

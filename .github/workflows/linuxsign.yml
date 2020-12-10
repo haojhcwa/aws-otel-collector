@@ -145,7 +145,7 @@ jobs:
 
       - name: Sign RPM Pakcage
         run: |
-          sudo apt install dpkg-sig
+          sudo apt install -y dpkg-sig
           dpkg-sig --sign origin -k "haojh@amazon.com" build/packages/debian/*/*.deb
 
       - name: Cache Debs
