@@ -30,10 +30,6 @@ jobs:
   sign-package:
     runs-on: ubuntu-latest
     steps:
-      - name: Install AWS Cli
-        run: |
-          sudo apt install awscli
-
       - name: Download Package Signing GPG key
         run: |
           aws secretsmanager get-secret-value --region us-west-2 --secret-id "$PKG_SIGN_PRIVATE_KEY_NAME" | jq -r ".SecretString" > pkg_sign_private.key
