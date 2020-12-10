@@ -167,7 +167,7 @@ jobs:
       - name: Sign RPM Pakcage
         run: |
           sudo apt install -y dpkg-sig
-          dpkg-sig --sign origin -k "haojh@amazon.com" build/packages/debian/*/*.deb
+          dpkg-sig --sign origin -k "aws-otel-collector@amazon.com" build/packages/debian/*/*.deb
 
       - name: Remove Package Signing GPG Key from local GPG Key Ring
         run: |
