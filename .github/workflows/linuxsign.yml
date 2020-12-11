@@ -123,7 +123,7 @@ jobs:
 
       - name: Remove Package Signing GPG Key from local GPG Key Ring
         run: |
-          gpg --delete-secret-keys aws-otel-collector@amazon.com
+          gpg --fingerprint --with-colons aws-otel-collector@amazon.com grep "^fpr" | sed -n 's/^fpr:::::::::\([[:alnum:]]\+\):/\1/p' | xargs gpg --batch --yes --delete-secret-keys
           gpg --list-secret-keys
 
       - name: Cache rpms
@@ -161,7 +161,7 @@ jobs:
       - name: Import Package Signing GPG Key
         run: |
           gpg --import pkg_sign_private.key
-          gpg --list-private-keys
+          gpg --list-secret-keys
           shred -fuvz pkg_sign_private.key
 
       - name: Sign RPM Pakcage
@@ -171,7 +171,7 @@ jobs:
 
       - name: Remove Package Signing GPG Key from local GPG Key Ring
         run: |
-          gpg --delete-secret-keys aws-otel-collector@amazon.com
+          gpg --fingerprint --with-colons aws-otel-collector@amazon.com grep "^fpr" | sed -n 's/^fpr:::::::::\([[:alnum:]]\+\):/\1/p' | xargs gpg --batch --yes --delete-secret-keys
           gpg --list-secret-keys
 
       - name: Cache Debs
